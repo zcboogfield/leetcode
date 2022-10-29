@@ -13,21 +13,24 @@ class Solution:
              '[':']',
              '(':')' 
     }
-    openers = pairs.keys()
-
-    #Runtime: 73 ms, faster than 9.26% of Python3 online submissions for Valid Parentheses.
+    '''
+    This is a functional solution that does not manipulate the original input.
+    '''
+    #Runtime: 54 ms, faster than 61.29% of Python3 online submissions for Valid Parentheses.
     #Memory Usage: 13.8 MB, less than 72.10% of Python3 online submissions for Valid Parentheses.
     def isValid(self, s: str) -> bool:
         openParens = []
         for char in s:
-            if char in self.openers:
+            if char is '{' or char is '[' or char is '(':
                 openParens.append(char)
             else: 
-                if not openParens or char is not self.pairs[openParens[-1]]:
+                if not openParens or char is not self.pairs[openParens.pop()]:
                     return False
-                else:
-                    openParens.pop(-1)
         return not openParens
+
+    def isValidMutation(self, s: str) -> bool:
+        return;
+
 
 run = Solution()
 
@@ -41,5 +44,3 @@ print(run.isValid("([{}])"))
 # Output: True
 print(run.isValid("]"))
 # Output: False
-
-
