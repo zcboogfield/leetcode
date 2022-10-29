@@ -1,5 +1,4 @@
- 
-// This was all quite fun, and good for you to do. But the assignment was literally just build the tree :upside-down:
+// This was all quite fun, and good for you to do. But the assignment was literally just build the tree :upside_down:
 const Node = (val, left, right) => ({
     val: (val===undefined ? 0 : val),
     left:  (left===undefined ? null : left),
