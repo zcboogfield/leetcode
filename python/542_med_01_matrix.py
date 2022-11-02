@@ -31,92 +31,40 @@ The distance between two adjacent cells is 1.
             # NodeMap -> AnsMap
 """
 # Didn't work.
+# Runtime: 885 ms, faster than 80.33% of Python3 online submissions for 01 Matrix.
+# Memory Usage: 17.5 MB, less than 34.24% of Python3 online submissions for 01 Matrix.
 class Solution:
     #Current leet_code status: Time Limit Exceeded :upside_down_face:
     # Apparently got through
     def updateMatrix(self, mat):
-        print("MAP", mat)
-        nx = len(mat);      #n
-        my = len(mat[0]);   #m
+        NX = len(mat);      #n
+        MY = len(mat[0]);   #m
 
-        ans = [[None for y in range(my)] for x in range(nx)] 
-        # Might be able to optimize  this by starting at center.
-        queue = [(0,0)]
+        checked = set()
+        queue = []
 
-        # This is REEEEEALLY handy.
-        def getNeighbors(node):
-            x, y = node[0], node[1]
-            # Makes sure the node exists.
-            return tuple(node for node in ((x+1, y), (x-1, y), (x, y+1), (x, y-1)) 
-                              if (node[0] > -1 and node[1] > -1 and node[0] < nx and node[1] < my))
-        
-        #This function call is probablly expensive and can be replaced.
-        def getNodeMapVal(node):
-            x, y = node[0], node[1]
-            return mat[x][y]
+        # print("MAT", mat)
+        # print("N/M", NX,MY)
 
-        # This updates the AnsMap
-        def updateAnsMap(node, val):
-            x, y = node[0], node[1]
-            print("ANS_CHANGE", ans, "NODE", (x,y), "VAL", val)
-            ans[x][y] = val 
-            # Checks every state change.
-            print("NEW_ANS   ", ans, "NODE", (x,y), "VAL", val, "\n")
-            return node
-
-        # this runs recursively until we find a 0.
-        def searchDepth(nodes, depth: int=1) -> int:
-            searchResults = [{
-                    "node": node,
-                    "nodeMapVal": getNodeMapVal(node),
-                    "neighbors": getNeighbors(node),
-                    "answered": type(ans[node[0]][node[1]]) is int,
-            } for node in nodes]
-
-            print("SEARCH_RESULTS_DEPTH", depth, searchResults)
-            unanswered = [result for result in searchResults if not result["answered"]]
-            print("UNanswered", unanswered)
-            queue.extend(tuple(result["node"] for result in unanswered if result["nodeMapVal"] == 1))
-            update = [updateAnsMap(result["node"], 0 if result["nodeMapVal"] == 0 else True) for result in unanswered]
-
-            # TODO This current implementation will not stop until it finds the depth with an actual zero.
-            # There might be an OPTIMIZATION for using a depth that already has a distance.
-
-            # Find the smallest ints
-            distances = [ans[result["node"][0]][result["node"][1]] for result in searchResults 
-                         if type(ans[result["node"][0]][result["node"][1]]) == int
-            ]
-            print("DISTANCES", distances)
-            if distances:
-                min_depth = min(distances)
-                # Add ANY unchecked neighbors
-                unchecked_neighbors = tuple(node 
-                    for result in unanswered 
-                    for node in result["neighbors"] 
-                    if ans[node[0]][node[1]] is None
-                )
-                queue.extend(unchecked_neighbors)
-                # True means they've been added to the queue.
-                update = [updateAnsMap(node, True) for node in unchecked_neighbors]
-                print("DEPTH_FOUND", depth, "MIN_DEPTH", min_depth)
-                return depth + min_depth
-            else:
-                return searchDepth(tuple(node for result in searchResults for node in result["neighbors"]), depth + 1) #
+        for x in range(0, NX):
+            for y in range(0, MY):
+                if mat[x][y] == 0:
+                    checked.add((x,y))
+                    queue.append((x,y))
 
         while queue: 
-            node = queue.pop(0)
-            nodeVal = getNodeMapVal(node)
-            print("QUEUE_POP", "NODE", node, "VAL", nodeVal, "QUEUE", queue, "\n")
-            if nodeVal == 1 and ans[node[0]][node[1]] is None:
-                #Sets the current distance needed node to "checked" so it is no longer added to the queue.
-                updateAnsMap(node, True)
-            updateAnsMap(node, 0 if nodeVal == 0 else searchDepth(getNeighbors(node), 1))
-            unchecked = [node for node in getNeighbors(node) if ans[node[0]][node[1]] is None]
-            queue.extend(unchecked)
-            # Once we put something in the queue, we mark it true as it will be checked.
-            update = [updateAnsMap(node, True) for node in unchecked]
-        return ans;
-
+            x,y = queue.pop(0)
+            print("NODE", x,y)
+            neighbors = [(nX, nY) for nX, nY in [(x+1, y), (x-1, y), (x, y+1), (x, y-1)] 
+                         if (nX > -1 and nY > -1 and nX < NX and nY < MY and (nX,nY) not in checked)
+             ]
+            # print("NEIGHBORS", neighbors)
+            for node in neighbors:
+                # print("NEW", node[0], node[1])
+                mat[node[0]][node[1]] = mat[x][y] + 1
+                checked.add(node)
+                queue.append(node)
+        return mat;
 run = Solution()
 
 #TESTS
@@ -126,13 +74,20 @@ run = Solution()
 
 # Setup a linter for this project.
 # Baby test just to confirm it runs.
-# # print(run.updateMatrix([[0,1,0],[1,0,0]]))
+# # # print(run.updateMatrix([[0,1,0],[1,0,0]]))
 # Output: [[0,1,0],[1,0,0]]
 
-##print(run.updateMatrix([[0,0,0],[0,1,0],[0,0,0]]))
+### print(run.updateMatrix([[0,0,0],[0,1,0],[0,0,0]]))
 #Output: [[0,0,0],[0,1,0],[0,0,0]]
 
-#print(run.updateMatrix([[0,0,0],[0,1,0],[1,1,1]]))
+## print(run.updateMatrix([[0,0,0],[0,1,0],[1,1,1]]))
 #Output: [[0,0,0],[0,1,0],[1,2,1]]
 
-print(run.updateMatrix([[0,1,0,1,1],[1,1,0,0,1],[0,0,0,1,0],[1,0,1,1,1],[1,0,0,0,1]]) ==  [[0,1,0,1,2],[1,1,0,0,1],[0,0,0,1,0],[1,0,1,1,1],[1,0,0,0,1]])
+# print(run.updateMatrix([[0,1,0,1,1],[1,1,0,0,1],[0,0,0,1,0],[1,0,1,1,1],[1,0,0,0,1]]) ==  [[0,1,0,1,2],[1,1,0,0,1],[0,0,0,1,0],[1,0,1,1,1],[1,0,0,0,1]])
+
+# Input
+print(run.updateMatrix([[1,1,0,1,1,1,1,1,1,1],[1,1,0,1,1,1,1,1,1,1],[1,1,1,1,0,0,0,1,1,0],[1,1,1,1,1,1,0,0,1,0],[1,0,0,1,1,1,0,1,0,1],[0,0,1,0,0,1,1,0,0,1],[0,1,0,1,1,1,1,1,1,1],[1,0,0,1,1,0,0,0,0,0],[0,0,1,1,1,1,0,1,1,1],[1,1,0,0,1,0,1,0,1,1]]))
+# Output
+#[[2,1,0,1,2,2,2,3,4,2],[3,1,0,1,1,1,1,2,2,1],[3,2,1,1,0,0,0,1,1,0],[4,1,1,2,1,1,0,0,1,0],[1,0,0,1,1,1,0,1,0,1],[0,0,1,0,0,1,1,0,0,1],[0,1,0,1,1,1,1,1,1,1],[1,0,0,1,1,0,0,0,0,0],[0,0,1,1,2,1,0,1,1,1],[1,1,0,0,1,0,1,0,1,2]]
+# Expected
+#[[2,1,0,1,2,2,2,3,3,2],[2,1,0,1,1,1,1,2,2,1],[3,2,1,1,0,0,0,1,1,0],[2,1,1,2,1,1,0,0,1,0],[1,0,0,1,1,1,0,1,0,1],[0,0,1,0,0,1,1,0,0,1],[0,1,0,1,1,1,1,1,1,1],[1,0,0,1,1,0,0,0,0,0],[0,0,1,1,2,1,0,1,1,1],[1,1,0,0,1,0,1,0,1,2]]
